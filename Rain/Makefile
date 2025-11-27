@@ -2,13 +2,13 @@ CC = x86_64-elf-gcc
 AS = x86_64-elf-as
 LD = x86_64-elf-ld
 
-CFLAGS = -Wall -Wextra -ffreestanding -mno-red-zone -m64
+CFLAGS = -Wall -Wextra -ffreestanding -mno-red-zone -m64 -Ikernel
 LDFLAGS = -nostdlib
 
 all: kernel.bin
 
-kernel.bin: multiboot.o boot.o paging.o long_mode.o gdt.o kernel.o tty.o keyboard.o
-	$(LD) -T linker.ld -o kernel.bin $(LDFLAGS) multiboot.o paging.o boot.o long_mode.o gdt.o kernel.o tty.o keyboard.o
+kernel.bin: multiboot.o boot.o paging.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o
+	$(LD) -T linker.ld -o kernel.bin $(LDFLAGS) multiboot.o paging.o boot.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o
 
 multiboot.o: boot/multiboot_header.s
 	$(AS) boot/multiboot_header.s -o multiboot.o
@@ -33,6 +33,12 @@ paging.o: boot/paging.s
 
 keyboard.o: kernel/keyboard.c
 	$(CC) $(CFLAGS) -c kernel/keyboard.c -o keyboard.o
+
+monarch.o: kernel/monarch/monarch.c
+	$(CC) $(CFLAGS) -c kernel/monarch/monarch.c -o monarch.o
+
+string.o: kernel/string.c
+	$(CC) $(CFLAGS) -c kernel/string.c -o string.o
 
 iso: kernel.bin
 	mkdir -p iso/boot/grub

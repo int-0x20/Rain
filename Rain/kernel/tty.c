@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "keyboard.h"
 
 static uint16_t* const VGA_MEMORY = (uint16_t*)0xB8000;
 static const int VGA_WIDTH = 80;
@@ -54,4 +55,15 @@ void tty_write(const char* str) {
     for (size_t i = 0; str[i] != 0; i++) {
         tty_putc(str[i]);
     }
+}
+
+char tty_read_char() {
+    char c = 0;
+
+    // Wait until keyboard driver provides a character
+    while ((c = keyboard_get_char()) == 0) {
+        // Spin — simple but works for early OS
+    }
+
+    return c;
 }
