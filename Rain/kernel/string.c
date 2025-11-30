@@ -35,3 +35,46 @@ int strncmp(const char *a, const char *b, size_t n) {
 
     return 0;
 }
+
+static char *strtok_saveptr = NULL;
+
+char *strtok(char *str, const char *delim) {
+    if (str)
+        strtok_saveptr = str;   // Start a new tokenization
+    else if (!strtok_saveptr)
+        return NULL;            // No more tokens
+
+    // Skip leading delimiters
+    char *token_start = strtok_saveptr;
+    while (*token_start && strchr(delim, *token_start))
+        token_start++;
+
+    if (*token_start == '\0') { // Reached end, no token
+        strtok_saveptr = NULL;
+        return NULL;
+    }
+
+    // Find end of token
+    char *p = token_start;
+    while (*p && !strchr(delim, *p))
+        p++;
+
+    if (*p == '\0') {
+        // End of string, next call returns NULL
+        strtok_saveptr = NULL;
+    } else {
+        *p = '\0';              // Null-terminate token
+        strtok_saveptr = p + 1; // Next token begins after delimiter
+    }
+
+    return token_start;
+}
+
+char *strchr(const char *s, int c) {
+    while (*s) {
+        if (*s == (char)c)
+            return (char*)s;
+        s++;
+    }
+    return NULL;
+}

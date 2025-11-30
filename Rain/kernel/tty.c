@@ -67,3 +67,17 @@ char tty_read_char() {
 
     return c;
 }
+
+void tty_write_hex(uint64_t val) {
+    const char *hex = "0123456789ABCDEF";
+    char buf[17];
+    buf[16] = 0;
+
+    for (int i = 15; i >= 0; --i) {
+        buf[i] = hex[val & 0xF];
+        val >>= 4;
+    }
+
+    tty_write("0x");
+    tty_write(buf);
+}
