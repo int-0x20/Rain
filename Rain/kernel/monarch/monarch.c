@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include "../string.h"
 #include <stdint.h>
+#include "../../programs/demo.h"
+#include "../program.h"
 
 #define INPUT_MAX 128
 #define EXEC_BASE  0x00200000
@@ -105,6 +107,12 @@ static void process_command(char *line) {
     if (strcmp(argv[0], "exec") == 0) {
         command_exec(argc, argv);
         return;
+    }
+
+    if (strcmp(argv[0], "run") == 0) {
+        tty_write("Starting program...\n");
+        program_create(demo_program);
+        program_scheduler();
     }
 
     // unknown

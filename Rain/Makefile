@@ -7,8 +7,8 @@ LDFLAGS = -nostdlib
 
 all: kernel.bin
 
-kernel.bin: multiboot.o boot.o paging.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o
-	$(LD) -T linker.ld -o kernel.bin $(LDFLAGS) multiboot.o paging.o boot.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o
+kernel.bin: multiboot.o boot.o paging.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o demo.o kalloc.o program.o
+	$(LD) -T linker.ld -o kernel.bin $(LDFLAGS) multiboot.o paging.o boot.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o demo.o kalloc.o program.o
 
 multiboot.o: boot/multiboot_header.s
 	$(AS) boot/multiboot_header.s -o multiboot.o
@@ -39,6 +39,15 @@ monarch.o: kernel/monarch/monarch.c
 
 string.o: kernel/string.c
 	$(CC) $(CFLAGS) -c kernel/string.c -o string.o
+
+demo.o: programs/demo.c
+	$(CC) $(CFLAGS) -c programs/demo.c -o demo.o
+
+kalloc.o: kernel/kalloc.c
+	$(CC) $(CFLAGS) -c kernel/kalloc.c -o kalloc.o
+
+program.o: kernel/program.c
+	$(CC) $(CFLAGS) -c kernel/program.c -o program.o
 
 iso: kernel.bin
 	mkdir -p iso/boot/grub
