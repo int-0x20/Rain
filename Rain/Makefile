@@ -1,3 +1,4 @@
+ 
 CC = x86_64-elf-gcc
 AS = x86_64-elf-as
 LD = x86_64-elf-ld
@@ -7,8 +8,8 @@ LDFLAGS = -nostdlib
 
 all: kernel.bin
 
-kernel.bin: multiboot.o boot.o paging.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o demo.o kalloc.o program.o
-	$(LD) -T linker.ld -o kernel.bin $(LDFLAGS) multiboot.o paging.o boot.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o demo.o kalloc.o program.o
+kernel.bin: multiboot.o boot.o paging.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o demo.o kalloc.o program.o ramdisk.o disk.o tarfs.o
+	$(LD) -T linker.ld -o kernel.bin $(LDFLAGS) -nostdlib multiboot.o paging.o boot.o long_mode.o gdt.o kernel.o tty.o keyboard.o monarch.o string.o demo.o kalloc.o program.o ramdisk.o disk.o tarfs.o
 
 multiboot.o: boot/multiboot_header.s
 	$(AS) boot/multiboot_header.s -o multiboot.o
@@ -48,6 +49,15 @@ kalloc.o: kernel/kalloc.c
 
 program.o: kernel/program.c
 	$(CC) $(CFLAGS) -c kernel/program.c -o program.o
+
+disk.o: kernel/disk.c
+	$(CC) $(CFLAGS) -c kernel/disk.c -o disk.o
+
+tarfs.o: kernel/tarfs.c
+	$(CC) $(CFLAGS) -c kernel/tarfs.c -o tarfs.o
+
+ramdisk.o: ramdisk.tar
+	ld -r -b binary -o ramdisk.o ramdisk.tar
 
 iso: kernel.bin
 	mkdir -p iso/boot/grub
