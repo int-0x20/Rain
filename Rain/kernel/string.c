@@ -1,4 +1,5 @@
 #include "string.h"
+#include <stdint.h>
 
 size_t strlen(const char *s) {
     size_t n = 0;
@@ -77,4 +78,42 @@ char *strchr(const char *s, int c) {
         s++;
     }
     return NULL;
+}
+
+void *memcpy(void *dest, const void *src, uint64_t n) {
+    uint8_t *d = (uint8_t *)dest;
+    const uint8_t *s = (const uint8_t *)src;
+
+    for (uint64_t i = 0; i < n; i++)
+        d[i] = s[i];
+
+    return dest;
+}
+
+void *memset(void *dest, int value, uint64_t n) {
+    uint8_t *d = (uint8_t *)dest;
+
+    for (uint64_t i = 0; i < n; i++)
+        d[i] = (uint8_t)value;
+
+    return dest;
+}
+
+void *memmove(void *dest, const void *src, uint64_t n) {
+    uint8_t *d = (uint8_t *)dest;
+    const uint8_t *s = (const uint8_t *)src;
+
+    if (d == s) return dest;
+
+    if (d < s) {
+        // copy forward
+        for (uint64_t i = 0; i < n; i++)
+            d[i] = s[i];
+    } else {
+        // copy backward
+        for (uint64_t i = n; i > 0; i--)
+            d[i - 1] = s[i - 1];
+    }
+
+    return dest;
 }

@@ -13,6 +13,8 @@
 void command_mon(int argc, char** argv);
 void command_exec(int argc, char **argv);
 uint64_t hex_to_uint64(const char *str);
+int cmd_ls(int argc, char **argv);
+int cmd_cat(int argc, char **argv);
 
 static void prompt() {
     tty_write("MonArch> ");
@@ -58,7 +60,6 @@ static void cmd_echo(char *args) {
 }
 
 static void process_command(char *line) {
-
     char *argv[10];
     int argc = 0;
 
@@ -68,7 +69,6 @@ static void process_command(char *line) {
         argv[argc++] = token;
         token = strtok(NULL, " ");
     }
-
     if (argc == 0) return;
 
     // help
@@ -91,10 +91,10 @@ static void process_command(char *line) {
 
     // echo
     if (strcmp(argv[0], "echo") == 0) {
-        if (argc >= 2)
-            cmd_echo(argv[1]);   // or reconstruct full string if needed
-        else
-            tty_write("\n");
+        if (argc >= 2) {
+            tty_write(argv[1]);
+        }
+        tty_write("\n");
         return;
     }
 
@@ -109,15 +109,28 @@ static void process_command(char *line) {
         return;
     }
 
+    // run demo program
     if (strcmp(argv[0], "run") == 0) {
         tty_write("Starting program...\n");
         program_create(demo_program);
         program_scheduler();
+        return;
     }
 
-    // unknown
+    if (strcmp(argv[0], "ls") == 0) {
+        cmd_ls(argc, argv);
+        return;
+    } 
+
+    if (strcmp(argv[0], "cat") == 0) {
+        cmd_cat(argc, argv);
+        return;
+    } 
+
+    // fallback
     tty_write("Unknown command\n");
 }
+
 
 
 void monarch_run() {
@@ -251,4 +264,38 @@ uint64_t hex_to_uint64(const char *str) {
     }
 
     return result;
+}
+
+#include "../tarfs.h"   // Make sure we include TarFS
+
+int cmd_ls(int argc, char **argv) {
+    tarfs_list();
+    return 0;
+}  
+
+int cmd_cat(int argc, char **argv) {
+    if (argc < 2) {
+        tty_printf("Usage: cat <filename>\n");
+        return 0;
+    }
+
+    const char *path = argv[1];
+    uint32_t size = 0;
+
+    char *data = tarfs_read_file(path, &size);
+    if (!data) {
+        tty_printf("cat: %s: No such file\n", path);
+        return 0;
+    }
+
+    // Print the file content
+    for (uint32_t i = 0; i < size; i++) {
+        tty_putc(data[i]);
+    }
+
+    // Add newline unless file already ends with one
+    if (size == 0 || data[size - 1] != '\n')
+        tty_putc('\n');
+
+    return 0;
 }
